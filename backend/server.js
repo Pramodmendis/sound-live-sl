@@ -14,12 +14,9 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-mongoose.connect(MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected successfully!'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(MONGO_URL)
+    .then(() => console.log('MongoDB connected successfully!'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 const connection = mongoose.connection;
 connection.on('error', (err) => console.error('MongoDB connection error:', err));
