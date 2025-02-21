@@ -5,7 +5,7 @@ const BlogPage = () => {
     <div className="text-white min-h-screen bg-gradient-to-b from-gray-900 to-black p-8">
       {/* Hero Section */}
       <header className="text-center mb-12">
-      <h1 className="text-5xl font-bold text-indigo-400 text-center mb-6">
+      <h1 className="text-5xl font-bold text-indigo-400 text-center mb-6 mt-10">
   Our Blog
 </h1>
 

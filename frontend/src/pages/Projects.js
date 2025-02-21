@@ -14,7 +14,7 @@ const Projects = () => {
     <div className="text-white min-h-screen bg-gradient-to-b from-black to-gray-900">
       {/* Hero Section */}
       <header className="text-center py-16 px-8 bg-black">
-        <h1 className="text-5xl font-bold text-indigo-400 mb-4">Our Projects</h1>
+        <h1 className="text-5xl font-bold text-indigo-400 mb-4 mt-10">Our Projects</h1>
         <p className="text-lg text-gray-300 max-w-2xl mx-auto">
           Explore our diverse portfolio of successful events, from concerts to corporate functions.
         </p>
