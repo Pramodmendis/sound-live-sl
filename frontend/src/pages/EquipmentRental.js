@@ -65,11 +65,16 @@ const equipmentCategories = [
   },
 ];
 
+
 const EquipmentRental = () => {
   const [selectedEquipment, setSelectedEquipment] = useState([]);
   const [eventType, setEventType] = useState("");
   const [eventLocation, setEventLocation] = useState("");
   const [eventDescription, setEventDescription] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [cardDetails, setCardDetails] = useState({ cardNumber: "", expiry: "", cvv: "", name: "" });
+  const [paymentReceipt, setPaymentReceipt] = useState(null);
+  const [paymentType, setPaymentType] = useState("full");
 
   const toggleEquipment = (item) => {
     setSelectedEquipment((prev) =>
@@ -77,35 +82,46 @@ const EquipmentRental = () => {
     );
   };
 
-  const labourCost = selectedEquipment.length * 1800;
-  const transportCost = selectedEquipment.length > 0 ? 5000 : 0;
-  const equipmentTotal = selectedEquipment.reduce((sum, item) => sum + item.price, 0);
-  const totalCost = equipmentTotal + labourCost + transportCost;
+  const totalCost = selectedEquipment.reduce((sum, item) => sum + item.price, 0);
+  const finalCost = paymentType === "advance" ? totalCost * 0.5 : totalCost;
 
   const handleBooking = () => {
     if (!eventType || !eventLocation || !eventDescription) {
       alert("Please fill in all event details before booking.");
       return;
     }
-
     if (selectedEquipment.length === 0) {
       alert("Please select at least one item before booking.");
       return;
     }
+    if (paymentMethod === "cash" && !paymentReceipt) {
+      alert("Please upload the payment receipt.");
+      return;
+    }
 
-    alert(`Booking confirmed for ${eventType} at ${eventLocation}!\nTotal cost: Rs. ${totalCost.toLocaleString()}`);
+    console.log("Booking Details:", {
+      eventType,
+      eventLocation,
+      eventDescription,
+      selectedEquipment,
+      totalCost,
+      finalCost,
+      paymentMethod,
+      cardDetails,
+      paymentReceipt,
+    });
+
+    alert(`Booking confirmed! Total cost: Rs. ${finalCost.toLocaleString()}`);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-6 text-black">Equipment Rental (Sri Lanka 🇱🇰)</h2>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-16">
+      <h2 className="text-2xl font-bold text-center mb-6 text-black">Equipment Rental</h2>
 
-      {/* Event Details Form */}
-      <div className="mb-6 p-4 bg-white rounded-lg border">
-        <h3 className="text-lg font-bold text-black mb-3">Event Details</h3>
+      <div className="mb-6">
         <input
           type="text"
-          placeholder="Event Type (e.g. Wedding, Concert)"
+          placeholder="Event Type"
           value={eventType}
           onChange={(e) => setEventType(e.target.value)}
           className="w-full border p-2 rounded-lg mb-3"
@@ -118,7 +134,7 @@ const EquipmentRental = () => {
           className="w-full border p-2 rounded-lg mb-3"
         />
         <textarea
-          placeholder="Brief Event Description"
+          placeholder="Event Description"
           value={eventDescription}
           onChange={(e) => setEventDescription(e.target.value)}
           className="w-full border p-2 rounded-lg"
@@ -126,58 +142,79 @@ const EquipmentRental = () => {
         />
       </div>
 
-      {/* Equipment Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {equipmentCategories.map((category, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg border">
-            <h3 className="text-lg font-bold mb-2 text-black">{category.category}</h3>
-            {category.items.map((item) => (
-              <label key={item.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer">
-                <input
-                  type="checkbox"
-                  onChange={() => toggleEquipment(item)}
-                  checked={selectedEquipment.includes(item)}
-                  className="form-checkbox text-blue-600"
-                />
-                <span className="text-black">{item.name} - Rs. {item.price.toLocaleString()}</span>
-              </label>
-            ))}
+      {equipmentCategories.map((category, index) => (
+        <div key={index} className="bg-white p-4 rounded-lg border mb-4">
+          <h3 className="text-lg font-bold mb-2 text-black">{category.category}</h3>
+          {category.items.map((item) => (
+            <label key={item.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                onChange={() => toggleEquipment(item)}
+                checked={selectedEquipment.includes(item)}
+                className="form-checkbox text-blue-600"
+              />
+              <span className="text-black">{item.name} - Rs. {item.price.toLocaleString()}</span>
+            </label>
+          ))}
+        </div>
+      ))}
+
+      <div className="mt-6">
+        <h3 className="text-lg font-bold">Payment Method</h3>
+        <select className="border p-2 w-full rounded-lg mb-3" onChange={(e) => setPaymentMethod(e.target.value)}>
+          <option value="">Select Payment Method</option>
+          <option value="card">Credit/Debit Card</option>
+          <option value="cash">Cash Deposit</option>
+        </select>
+
+        {paymentMethod === "card" && (
+          <div>
+            <input
+              type="text"
+              placeholder="Card Number"
+              className="w-full border p-2 rounded-lg mb-2"
+              value={cardDetails.cardNumber}
+              onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Expiry Date (MM/YY)"
+              className="w-full border p-2 rounded-lg mb-2"
+              value={cardDetails.expiry}
+              onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="CVV"
+              className="w-full border p-2 rounded-lg mb-2"
+              value={cardDetails.cvv}
+              onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Cardholder Name"
+              className="w-full border p-2 rounded-lg mb-2"
+              value={cardDetails.name}
+              onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
+            />
           </div>
-        ))}
-      </div>
-
-      {/* Selected Items */}
-      <div className="mt-6 p-4 bg-white rounded-lg border">
-        <h3 className="text-lg font-bold text-black">Selected Equipment</h3>
-        {selectedEquipment.length > 0 ? (
-          <ul className="list-disc ml-6 mt-2 text-black">
-            {selectedEquipment.map((item) => (
-              <li key={item.id}>{item.name} - Rs. {item.price.toLocaleString()}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500 mt-2">No equipment selected.</p>
         )}
+
+        {paymentMethod === "cash" && (
+          <input
+            type="file"
+            className="w-full border p-2 rounded-lg mb-2"
+            onChange={(e) => setPaymentReceipt(e.target.files[0])}
+          />
+        )}
+
+        <select className="border p-2 w-full rounded-lg mb-3" onChange={(e) => setPaymentType(e.target.value)}>
+          <option value="full">Full Payment</option>
+          <option value="advance">Advance Payment (50%)</option>
+        </select>
       </div>
 
-      {/* Cost Breakdown */}
-      <div className="mt-6 p-4 bg-white rounded-lg border">
-        <h3 className="text-lg font-bold text-black">Cost Breakdown</h3>
-        <p className="text-black mt-2">Equipment Total: <strong>Rs. {equipmentTotal.toLocaleString()}</strong></p>
-        <p className="text-black">Labour Cost: <strong>Rs. {labourCost.toLocaleString()}</strong></p>
-        <p className="text-black">Transport Cost: <strong>Rs. {transportCost.toLocaleString()}</strong></p>
-      </div>
-
-      {/* Total Cost */}
-      <div className="p-4 mt-6 bg-white rounded-lg text-center border">
-        <h3 className="text-xl font-bold text-black">Total Cost: Rs. {totalCost.toLocaleString()}</h3>
-      </div>
-
-      {/* Book Now Button */}
-      <button
-        onClick={handleBooking}
-        className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4 hover:bg-blue-700 transition duration-300"
-      >
+      <button onClick={handleBooking} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">
         Book Now
       </button>
     </div>
