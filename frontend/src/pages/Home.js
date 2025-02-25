@@ -3,6 +3,7 @@ import Aboutusup1 from "../assets/1.jpg";
 import Aboutusup2 from "../assets/2.jpg";
 import Aboutusup3 from "../assets/3.jpg";
 import Aboutusup4 from "../assets/4.jpg";
+import directorImage from "../assets/director.jpg";
 
 const Home = () => {
   const images = [Aboutusup1, Aboutusup2, Aboutusup3, Aboutusup4];
@@ -77,6 +78,25 @@ const Home = () => {
           </p>
         </div>
       </div>
+
+      <section className="py-16 px-8 text-center bg-gradient-to-b from-gray-900 to-black">
+  <h2 className="text-4xl font-bold text-indigo-400 mb-6">Message from Our Director</h2>
+  <div className="max-w-4xl mx-auto bg-gray-800 bg-opacity-80 p-8 rounded-lg shadow-lg">
+    <img
+      src={directorImage}
+      alt="Director"
+      className="w-32 h-32 mx-auto rounded-full mb-4 border-4 border-indigo-400"
+    />
+    <p className="text-xl italic text-gray-300 leading-relaxed">
+      "At Sound Live, we believe in delivering top-tier sound, lighting, and visual experiences 
+      that transform events into unforgettable moments. Our team is committed to innovation, 
+      excellence, and customer satisfaction. Thank you for trusting us to bring your vision to life."
+    </p>
+    <p className="mt-4 text-lg font-semibold text-indigo-300">- Mr. Sampath Mendis</p>
+  </div>
+</section>
+
+
 
       <section className="py-16 px-8 bg-gray-800 text-center">
         <h2 className="text-4xl font-bold text-indigo-400 mb-6">What Our Clients Say</h2>
