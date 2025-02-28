@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginFormImage from '../assets/Login form.jpg';
@@ -11,30 +10,38 @@ const Login = () => {
   });
   const [error, setError] = useState('');
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
     try {
-      // Send a POST request to the backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email: formData.email,
-        password: formData.password,
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
-      // Handle success
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token); // Save token to localStorage
-        navigate('/'); // Redirect to home page
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.msg || 'Login failed');
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        navigate('/');
       }
     } catch (err) {
-      // Handle errors
-      setError(err.response?.data?.msg || 'An error occurred during login');
+      setError(err.message);
     }
   };
 

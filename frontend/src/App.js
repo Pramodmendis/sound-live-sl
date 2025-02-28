@@ -5,7 +5,6 @@ import Navbar from "./components/Navbar";
 
 // Pages
 import About from "./pages/About";
-import Blog from "./pages/Blog";
 import BookingIntro from "./pages/BookingIntro";
 import BookingStudios from "./pages/BookingStudios";
 import Login from "./pages/Client_Login";
@@ -17,10 +16,15 @@ import Home from "./pages/Home";
 import Projects from "./pages/Projects";
 import Services from "./pages/Services";
 
+//Blog page
+import Blog from "./pages/Blog/Blog";
+
 // Admin Pages
 import AdminDashboard from "./pages/admin/admindashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminMediaUpload from "./pages/admin/AdminMediaUpload";
 import Admins from "./pages/admin/Admins";
+import AdminSignup from "./pages/admin/AdminSignup";
 import ClientMessagesList from "./pages/admin/ClientMessages";
 import EquipmentBooking from "./pages/admin/EquipmentBookings";
 import EventList from "./pages/admin/EventList";
@@ -30,7 +34,7 @@ import Users from "./pages/admin/Users";
 function Layout() {
   const location = useLocation();
 
-  // Check if the path includes "/admin"
+  // Check if the path includes "/admin" to hide Navbar and Footer
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
@@ -53,6 +57,9 @@ function Layout() {
           <Route path="/bookingintro" element={<BookingIntro />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/bookingstudios" element={<BookingStudios />} />
+          <Route path="/equipment-rental" element={<EquipmentRental />} />
+
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/eventlist" element={<EventList />} />
@@ -60,7 +67,8 @@ function Layout() {
           <Route path="/admin/studiobookings" element={<StudioBookingList />} />
           <Route path="/admin/equipmentbookings" element={<EquipmentBooking />} />
           <Route path="/admin/clientmessages" element={<ClientMessagesList />} />
-          <Route path="/equipment-rental" element={<EquipmentRental />} />
+          <Route path="/admin/mediauploads" element={<AdminMediaUpload />} />
+          <Route path="/admin/signup" element={<AdminSignup />} />
           <Route path="/admin/login" element={<AdminLogin />} />
         </Routes>
       </main>

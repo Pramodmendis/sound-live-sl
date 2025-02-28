@@ -1,6 +1,5 @@
-import { faFacebookF, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SignupPageFormImage from '../assets/Signup.jpg';
@@ -11,47 +10,45 @@ const SignupPage = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
-  const [error, setError] = useState('');
 
-  // Handle input changes
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Check if passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    setError('');
 
     try {
-      // Send a POST request to the backend
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
-      // Handle success
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token); // Save token to localStorage
-        navigate('/'); // Redirect to home page
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || '❌ An error occurred during signup');
       }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      // Handle errors
-      setError(err.response?.data?.msg || 'An error occurred during signup');
+      setError(err.message);
     }
   };
 
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
       <div className="max-w-5xl w-full bg-white shadow-lg rounded-2xl md:flex">
+        
         {/* Left Image Section */}
         <div className="hidden md:block w-1/2 rounded-l-2xl overflow-hidden">
           <img
@@ -66,7 +63,10 @@ const SignupPage = () => {
           <h2 className="text-2xl font-bold text-blue-900 mb-6 text-center">Create an Account</h2>
           <p className="text-gray-600 text-center mb-8">Join Sound Live and elevate your event experience.</p>
 
-          {/* Display error message if any */}
+          {/* ✅ Success Message */}
+          {success && <p className="text-green-600 text-center mb-4">🎉 Account created successfully! Redirecting...</p>}
+          
+          {/* ❌ Display Error Message if Any */}
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit}>
@@ -109,19 +109,6 @@ const SignupPage = () => {
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm mb-2">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                placeholder="********"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
             <button
               type="submit"
               className="w-full bg-black text-white py-2 px-4 rounded-lg hover:bg-zinc-700 transition-all"
@@ -144,10 +131,6 @@ const SignupPage = () => {
             <button className="flex items-center px-4 py-2 border rounded-lg hover:bg-gray-100">
               <FontAwesomeIcon icon={faGoogle} className="text-red-500 mr-2" />
               Google
-            </button>
-            <button className="flex items-center px-4 py-2 border rounded-lg hover:bg-gray-100">
-              <FontAwesomeIcon icon={faFacebookF} className="text-blue-600 mr-2" />
-              Facebook
             </button>
           </div>
         </div>

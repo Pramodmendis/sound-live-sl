@@ -1,8 +1,10 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import { connectDB } from "./config/db.js"; // ✅ Use named import
+import { connectDB } from "./config/db.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import EquipmentBookingsRoutes from "./routes/EquipmentBookingsRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +22,8 @@ connectDB()
 
     // Routes
     app.use("/api/auth", authRoutes);
+    app.use("/api/EquipmentBookings", EquipmentBookingsRoutes);
+    app.use("/api/admin", adminRoutes);
 
     // Global Error Handling Middleware
     app.use((err, req, res, next) => {
@@ -34,5 +38,5 @@ connectDB()
   })
   .catch((err) => {
     console.error("❌ Database Connection Failed:", err.message);
-    process.exit(1); // Exit process on DB connection failure
+    process.exit(1);
   });

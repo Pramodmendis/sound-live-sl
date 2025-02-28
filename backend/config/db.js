@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-dotenv.config(); // ✅ Ensure .env is loaded
+dotenv.config();
 
 const connectDB = async () => {
   try {
-    console.log("🔍 MONGODB_URI:", process.env.MONGODB_URI); // Debug: Check if it prints
+    console.log("🔍 MONGODB_URI:", process.env.MONGODB_URI);
 
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
