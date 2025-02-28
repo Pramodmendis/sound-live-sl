@@ -6,29 +6,29 @@ import Logo from "../assets/Logo.jpg";
 const Footer = () => {
   return (
     <footer className="bg-[#0b1120] text-white py-10">
-      <div className="container mx-auto px-6 md:flex justify-between items-start">
+      <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center md:items-start gap-10">
+        
         {/* Logo & Description */}
-        <div className="flex items-start space-x-6">
-          <div className="flex-shrink-0">
-            <img src={Logo} alt="Footer Logo" className="w-40 h-auto rounded-lg" />
-          </div>
-          <p className="text-gray-300 max-w-md text-base leading-relaxed">
-            Your trusted partner for indoor event solutions. Book top-quality sound systems,
+        <div className="flex flex-col md:flex-row items-center md:items-start space-x-0 md:space-x-6 text-center md:text-left">
+          <img src={Logo} alt="Footer Logo" className="w-32 h-auto rounded-lg" />
+          <p className="text-gray-300 max-w-md text-base leading-relaxed mt-4 md:mt-0">
+          Your trusted partner for indoor event solutions. Book top-quality sound systems,
             lighting, LED walls, and studio sessions all in one place. Experience seamless service,
             professional-grade equipment, and a user-friendly platform designed to make your events unforgettable.
           </p>
         </div>
 
         {/* Contact Information */}
-        <div className="mt-8 md:mt-0 md:ml-10">
+        <div className="text-center md:text-left">
           <h3 className="text-lg font-semibold mb-3">Contact Us</h3>
           <p className="text-gray-300">Email: soundliveofficials@gmail.com</p>
           <p className="text-gray-300">Phone: +94 777796834</p>
+
           {/* Social Media Links */}
-          <div className="flex space-x-4 mt-5">
+          <div className="flex justify-center md:justify-start space-x-4 mt-5">
             <a
               href="https://www.facebook.com/SoundLiveOfficial"
-              className="w-8 h-8 flex items-center justify-center border border-gray-500 rounded-full hover:bg-gray-600"
+              className="w-8 h-8 flex items-center justify-center border border-gray-500 rounded-full hover:bg-gray-600 transition duration-300"
               target="_blank" 
               rel="noopener noreferrer"
             >
@@ -36,7 +36,7 @@ const Footer = () => {
             </a>
             <a
               href="https://www.instagram.com/yourpage"
-              className="w-8 h-8 flex items-center justify-center border border-gray-500 rounded-full hover:bg-gray-600"
+              className="w-8 h-8 flex items-center justify-center border border-gray-500 rounded-full hover:bg-gray-600 transition duration-300"
               target="_blank"
               rel="noopener noreferrer"
             >
