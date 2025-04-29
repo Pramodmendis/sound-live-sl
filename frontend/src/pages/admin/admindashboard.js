@@ -1,12 +1,12 @@
 import {
-    faBars,
-    faCalendarAlt,
-    faClock,
-    faComment,
-    faSignOutAlt,
-    faUser,
-    faUsers,
-    faUserShield
+  faBars,
+  faCalendarAlt,
+  faClock,
+  faComment,
+  faSignOutAlt,
+  faUser,
+  faUsers,
+  faUserShield
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";

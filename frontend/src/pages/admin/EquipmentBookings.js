@@ -1,68 +1,111 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const bookings = [
-  {
-    id: 1,
-    equipment: "Line Array Speaker System",
-    category: "Sound",
-    bookedDate: "Feb 20, 2025",
-    returnDate: "Feb 25, 2025",
-    status: "Confirmed",
-  },
-  {
-    id: 2,
-    equipment: "Moving Head Stage Lights",
-    category: "Lighting",
-    bookedDate: "Feb 22, 2025",
-    returnDate: "Feb 26, 2025",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    equipment: "LED Video Wall 4K",
-    category: "LED Wall",
-    bookedDate: "Feb 25, 2025",
-    returnDate: "Feb 27, 2025",
-    status: "Returned",
-  },
-];
+const EquipmentBookings = () => {
+  const [bookings, setBookings] = useState([]);
 
-const statusColors = {
-  Confirmed: "bg-green-600 text-white",
-  Pending: "bg-yellow-600 text-white",
-  Returned: "bg-blue-600 text-white",
-};
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/equipmentBookings/all");
+        const data = await res.json();
+        setBookings(data);
+      } catch (error) {
+        console.error("Failed to fetch equipment bookings:", error);
+      }
+    };
 
-const categoryColors = {
-  Sound: "bg-purple-600 text-white",
-  Lighting: "bg-orange-600 text-white",
-  "LED Wall": "bg-indigo-600 text-white",
-};
+    fetchBookings();
+  }, []);
 
-const EquipmentBooking = () => {
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/equipmentBookings/update-status/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setBookings((prev) =>
+          prev.map((b) => (b._id === id ? updated : b))
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update booking status:", error);
+    }
+  };
+
+  const getStatusBadgeColor = (status) => {
+    if (status === "Accepted") return "bg-green-600";
+    if (status === "Cancelled") return "bg-red-600";
+    return "bg-yellow-500";
+  };
+
   return (
-    <div className="max-w-3xl mx-auto p-4 bg-gradient-to-b from-gray-900 to-black text-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">Equipment Booking List</h2>
-      <div className="space-y-4">
-        {bookings.map((booking) => (
-          <div key={booking.id} className="bg-gray-800 p-4 rounded-lg shadow-md border border-gray-700">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold">{booking.equipment}</h3>
-              <span className={`px-3 py-1 text-sm font-semibold rounded ${categoryColors[booking.category]}`}>
-                {booking.category}
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm mt-1">
-              <strong>Booked:</strong> {booking.bookedDate} | <strong>Return:</strong> {booking.returnDate}
-            </p>
-            <span className={`inline-block mt-2 px-3 py-1 text-sm font-semibold rounded ${statusColors[booking.status]}`}>
-              {booking.status}
-            </span>
-          </div>
-        ))}
+    <div className="min-h-screen p-6 text-white bg-gradient-to-b from-gray-900 to-black">
+      <h2 className="mb-6 text-3xl font-bold text-center">Equipment Bookings</h2>
+
+      <div className="p-4 overflow-x-auto bg-gray-800 rounded-lg shadow-md">
+        <table className="w-full text-sm table-auto">
+          <thead>
+            <tr className="text-left bg-gray-700">
+              <th className="p-3">Client</th>
+              <th className="p-3">Event Type</th>
+              <th className="p-3">Location</th>
+              <th className="p-3">Total (LKR)</th>
+              <th className="p-3">Status</th>
+              <th className="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bookings.map((booking) => (
+              <tr key={booking._id} className="border-t border-gray-600 hover:bg-gray-700">
+                <td className="p-3">{booking.clientId?.username || "N/A"}</td>
+                <td className="p-3">{booking.eventType}</td>
+                <td className="p-3">{booking.eventLocation}</td>
+                <td className="p-3">Rs {booking.total.toLocaleString()}</td>
+                <td className="p-3">
+                  <span className={`px-2 py-1 rounded ${getStatusBadgeColor(booking.status)}`}>
+                    {booking.status}
+                  </span>
+                </td>
+                <td className="p-3 space-x-2">
+                  {booking.status === "Pending" ? (
+                    <>
+                      <button
+                        onClick={() => handleStatusChange(booking._id, "Accepted")}
+                        className="px-3 py-1 text-xs text-white bg-green-600 rounded hover:bg-green-700"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(booking._id, "Cancelled")}
+                        className="px-3 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-gray-400">No Action</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {bookings.length === 0 && (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-400">
+                  No equipment bookings available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default EquipmentBooking;
+export default EquipmentBookings;

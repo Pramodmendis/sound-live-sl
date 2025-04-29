@@ -1,39 +1,58 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Password reset link sent to:", email);
-    // Add password reset logic here
+    setError('');
+    setMessage('');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage(data.message);
+        localStorage.setItem('reset_email', email);
+        navigate('/reset-password');
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Something went wrong.');
+    }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-900 to-black text-poppins">
-      <div className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-gray-100">
-        <h2 className="text-2xl font-semibold text-center mb-4">Forgot Password</h2>
-        <form onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium mb-2">Email</label>
-          <input
-            type="email"
-            placeholder="user@gmail.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mb-4 w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <button type="submit" className="bg-black w-full text-white hover:bg-zinc-600 py-2 rounded-xl font-medium">
-            Submit
-          </button>
-        </form>
-        <p className="text-center mt-4 text-sm">
-          Remembered your password?{' '}
-          <a href="/login" className="text-black hover:underline">
-            Sign in
-          </a>
-        </p>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black">
+      <form onSubmit={handleSubmit} className="p-8 bg-white rounded shadow-md w-80">
+        <h2 className="mb-4 text-2xl text-center">Forgot Password</h2>
+
+        {message && <p className="mb-4 text-green-500">{message}</p>}
+        {error && <p className="mb-4 text-red-500">{error}</p>}
+
+        <input
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-4 border rounded"
+          required
+        />
+
+        <button type="submit" className="w-full p-2 text-white bg-black rounded">
+          Send Reset Code
+        </button>
+      </form>
     </div>
   );
 };

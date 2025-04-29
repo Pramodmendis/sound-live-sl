@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const projects = [
   { title: "Concert Sound & Lighting", description: "Delivered high-quality sound and dynamic lighting for a sold-out music concert.", category: "Concerts" },
@@ -10,6 +11,8 @@ const projects = [
 ];
 
 const Projects = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="text-white min-h-screen bg-gradient-to-b from-black to-gray-900">
       {/* Hero Section */}
@@ -44,7 +47,8 @@ const Projects = () => {
         <p className="text-lg text-gray-300 max-w-xl mx-auto mb-6">
           We bring expertise and innovation to every event. Let's create something spectacular together!
         </p>
-        <button className="bg-indigo-600 px-6 py-3 rounded-lg text-white font-semibold hover:bg-indigo-700 transition">
+        <button className="bg-indigo-600 px-6 py-3 rounded-lg text-white font-semibold hover:bg-indigo-700 transition"
+        onclick={() => navigate("/contact")}>
           Contact Us
         </button>
       </section>

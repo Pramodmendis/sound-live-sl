@@ -1,61 +1,71 @@
-import { useState } from "react";
+import { useSignIn } from "@clerk/clerk-react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
-  const [form, setForm] = useState({ username: "", password: "" });
+  const { signIn } = useSignIn();
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    const response = await fetch("http://localhost:5000/api/admin/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const data = await response.json();
-    if (response.ok){
-      localStorage.setItem ("adminToken", data.token);
-      navigate("/admin");
-    } else {
-      alert("Login failed");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await signIn.create({
+        identifier: emailAddress,
+        password: password,
+      });
+
+      navigate("/admin/admin");
+    } catch (err) {
+      console.error(err.errors);
+      setError("Invalid email or password. Please try again.");
     }
   };
 
-  return(
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black px-4">
-    <div className="bg-gray-800 p-8 rounded-2xl shadow-lg max-w-sm w-full text-center text-white">
-      <h2 className="text-2xl font-bold mb-6">Admin Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full px-4 py-2 mb-4 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full px-4 py-2 mb-6 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 transition rounded-lg font-semibold"
-        >
-          Login
-        </button>
-        <button
-              className="text-sm text-white hover:underline focus:outline-none"
-              onClick={() => navigate('/admin/signup')}
-            >
-              Don't have an account? Sign up here.
-            </button>
-      </form>
+  return (
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-b from-gray-900 to-black">
+      <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-md">
+        <h2 className="mb-6 text-2xl font-bold text-center text-white">
+          Admin Login
+        </h2>
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={emailAddress}
+              onChange={(e) => setEmailAddress(e.target.value)}
+              required
+              className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
+            />
+          </div>
+
+          {error && <div className="text-sm text-red-500">{error}</div>}
+
+          <button
+            type="submit"
+            className="w-full py-3 font-semibold text-white bg-green-600 rounded hover:bg-green-700"
+          >
+            Login
+          </button>
+        </form>
+      </div>
     </div>
-  </div>
   );
 };
-  
+
 export default AdminLogin;

@@ -1,14 +1,34 @@
-import React from "react";
-import Contactus from "../assets/Upbackground.jpg";
+import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import C1 from "../assets/C1.jpg";
+import C2 from "../assets/C2.jpg";
+import C3 from "../assets/C3.jpg";
+import C4 from "../assets/C4.jpg";
+import C5 from "../assets/C5.jpg";
+
+
 
 const ContactPage = () => {
+  const images = [C1,C2,C3,C4,C5];
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }, 5000);
+  
+      return () => clearInterval(interval);
+    }, [images.length]);
   return (
-    <div className="flex flex-col min-h-screen justify-between font-poppins bg-gradient-to-b from-gray-900 to-black text-white">
+    <div className="flex flex-col min-h-screen justify-between font-poppins text-white">
       <header className="relative bg-cover bg-center h-screen flex items-center justify-center text-center">
-        <img
-          src={Contactus}
-          alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover -z-10 opacity-60"
+      <motion.img
+          src={images[currentImageIndex]}
+          alt={`Slide ${currentImageIndex + 1}`}
+          className="absolute inset-0 w-full h-full object-cover -z-10 transition-opacity duration-1000 ease-in-out blur-sm"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5 }}
         />
         <div className="z-10">
           <h1 className="text-5xl md:text-7xl font-extrabold text-indigo-400 drop-shadow-lg">

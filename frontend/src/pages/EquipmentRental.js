@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
 const equipmentCategories = [
   {
@@ -63,162 +63,169 @@ const equipmentCategories = [
       { id: 32, name: "Communication System", price: 65000 },
     ],
   },
+
 ];
 
+function EquipmentRental() {
+  const [form, setForm] = useState({
+    eventType: "",
+    eventLocation: "",
+    eventDescription: "",
+    selectedEquipment: [],
+  });
 
-const EquipmentRental = () => {
-  const [selectedEquipment, setSelectedEquipment] = useState([]);
-  const [eventType, setEventType] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [cardDetails, setCardDetails] = useState({ cardNumber: "", expiry: "", cvv: "", name: "" });
-  const [paymentReceipt, setPaymentReceipt] = useState(null);
-  const [paymentType, setPaymentType] = useState("full");
+  const clientUser = JSON.parse(localStorage.getItem("user"));
 
-  const toggleEquipment = (item) => {
-    setSelectedEquipment((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
-    );
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://www.payhere.lk/lib/payhere.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const handleCheckboxChange = (item) => {
+    setForm((prev) => {
+      const updated = prev.selectedEquipment.some((i) => i.id === item.id)
+        ? prev.selectedEquipment.filter((i) => i.id !== item.id)
+        : [...prev.selectedEquipment, item];
+      return { ...prev, selectedEquipment: updated };
+    });
   };
 
-  const totalCost = selectedEquipment.reduce((sum, item) => sum + item.price, 0);
-  const finalCost = paymentType === "advance" ? totalCost * 0.5 : totalCost;
+  const calculateTotal = () => {
+    return form.selectedEquipment.reduce((sum, item) => sum + item.price, 0);
+  };
 
-  const handleBooking = () => {
-    if (!eventType || !eventLocation || !eventDescription) {
-      alert("Please fill in all event details before booking.");
-      return;
-    }
-    if (selectedEquipment.length === 0) {
-      alert("Please select at least one item before booking.");
-      return;
-    }
-    if (paymentMethod === "cash" && !paymentReceipt) {
-      alert("Please upload the payment receipt.");
+  const handlePayHere = () => {
+    const orderId = "Equipment_" + Date.now();
+    const totalAmount = calculateTotal();
+
+    if (totalAmount === 0) {
+      alert("Please select at least one equipment item.");
       return;
     }
 
-    console.log("Booking Details:", {
-      eventType,
-      eventLocation,
-      eventDescription,
-      selectedEquipment,
-      totalCost,
-      finalCost,
-      paymentMethod,
-      cardDetails,
-      paymentReceipt,
-    });
+    const payment = {
+      sandbox: true,
+      merchant_id: "1211149",
+      return_url: "http://localhost:3000/payment-success",
+      cancel_url: "http://localhost:3000/payment-cancel",
+      notify_url: "http://localhost:5000/api/payments/payhere-callback",
 
-    alert(`Booking confirmed! Total cost: Rs. ${finalCost.toLocaleString()}`);
+      order_id: orderId,
+      items: "Equipment Booking",
+      amount: totalAmount.toFixed(2),
+      currency: "LKR",
+      first_name: clientUser.username,
+      last_name: "Client",
+      email: clientUser.email,
+      phone: "0771234567",
+      address: "Colombo",
+      city: "Colombo",
+      country: "Sri Lanka",
+    };
+
+    window.payhere.onCompleted = async function (completedOrderId) {
+      try {
+        const res = await fetch("http://localhost:5000/api/equipmentBookings/add", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("clientToken")}`,
+          },
+          body: JSON.stringify({
+            ...form,
+            paymentMethod: "payhere",
+            paymentType: "full",
+            payhereOrderId: completedOrderId,
+          }),
+        });
+
+        if (res.ok) alert("\u2705 Booking successful after payment!");
+        else alert("\u274C Booking failed.");
+      } catch (err) {
+        console.error(err);
+        alert("\u274C Booking error.");
+      }
+    };
+
+    window.payhere.onDismissed = function () {
+      alert("Payment dismissed by user.");
+    };
+
+    window.payhere.onError = function (error) {
+      alert("Payment error: " + error);
+    };
+
+    window.payhere.startPayment(payment);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-16">
-      <h2 className="text-2xl font-bold text-center mb-6 text-black">Equipment Rental</h2>
-
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Event Type"
-          value={eventType}
-          onChange={(e) => setEventType(e.target.value)}
-          className="w-full border p-2 rounded-lg mb-3"
-        />
-        <input
-          type="text"
-          placeholder="Event Location"
-          value={eventLocation}
-          onChange={(e) => setEventLocation(e.target.value)}
-          className="w-full border p-2 rounded-lg mb-3"
-        />
-        <textarea
-          placeholder="Event Description"
-          value={eventDescription}
-          onChange={(e) => setEventDescription(e.target.value)}
-          className="w-full border p-2 rounded-lg"
-          rows="3"
-        />
-      </div>
-
-      {equipmentCategories.map((category, index) => (
-        <div key={index} className="bg-white p-4 rounded-lg border mb-4">
-          <h3 className="text-lg font-bold mb-2 text-black">{category.category}</h3>
-          {category.items.map((item) => (
-            <label key={item.id} className="flex items-center space-x-2 border p-2 rounded-lg cursor-pointer">
-              <input
-                type="checkbox"
-                onChange={() => toggleEquipment(item)}
-                checked={selectedEquipment.includes(item)}
-                className="form-checkbox text-blue-600"
-              />
-              <span className="text-black">{item.name} - Rs. {item.price.toLocaleString()}</span>
-            </label>
-          ))}
+    <div className="min-h-screen px-4 py-8 pt-24 text-white bg-gradient-to-b from-gray-900 to-black md:px-8">
+      <div className="max-w-5xl p-8 mx-auto rounded-lg shadow-lg bg-gradient-to-b from-gray-800 to-gray-900">
+        <div className="mb-10 text-center">
+          <h2 className="text-4xl font-extrabold tracking-wide text-white">Equipment Rental Booking</h2>
+          <p className="mt-2 text-gray-300">Fill in the event details and select your equipment below.</p>
         </div>
-      ))}
 
-      <div className="mt-6">
-        <h3 className="text-lg font-bold">Payment Method</h3>
-        <select className="border p-2 w-full rounded-lg mb-3" onChange={(e) => setPaymentMethod(e.target.value)}>
-          <option value="">Select Payment Method</option>
-          <option value="card">Credit/Debit Card</option>
-          <option value="cash">Cash Deposit</option>
-        </select>
-
-        {paymentMethod === "card" && (
-          <div>
-            <input
-              type="text"
-              placeholder="Card Number"
-              className="w-full border p-2 rounded-lg mb-2"
-              value={cardDetails.cardNumber}
-              onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Expiry Date (MM/YY)"
-              className="w-full border p-2 rounded-lg mb-2"
-              value={cardDetails.expiry}
-              onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="CVV"
-              className="w-full border p-2 rounded-lg mb-2"
-              value={cardDetails.cvv}
-              onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Cardholder Name"
-              className="w-full border p-2 rounded-lg mb-2"
-              value={cardDetails.name}
-              onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-            />
-          </div>
-        )}
-
-        {paymentMethod === "cash" && (
+        <div className="grid grid-cols-1 gap-6 mb-8 md:grid-cols-2">
           <input
-            type="file"
-            className="w-full border p-2 rounded-lg mb-2"
-            onChange={(e) => setPaymentReceipt(e.target.files[0])}
+            type="text"
+            placeholder="Event Type"
+            value={form.eventType}
+            onChange={(e) => setForm({ ...form, eventType: e.target.value })}
+            className="w-full p-3 text-white bg-gray-900 border border-gray-500 rounded-md"
           />
-        )}
+          <input
+            type="text"
+            placeholder="Event Location"
+            value={form.eventLocation}
+            onChange={(e) => setForm({ ...form, eventLocation: e.target.value })}
+            className="w-full p-3 text-white bg-gray-900 border border-gray-500 rounded-md"
+          />
+          <textarea
+            placeholder="Event Description"
+            value={form.eventDescription}
+            onChange={(e) => setForm({ ...form, eventDescription: e.target.value })}
+            className="col-span-1 p-3 text-white bg-gray-900 border border-gray-500 rounded-md md:col-span-2"
+          />
+        </div>
 
-        <select className="border p-2 w-full rounded-lg mb-3" onChange={(e) => setPaymentType(e.target.value)}>
-          <option value="full">Full Payment</option>
-          <option value="advance">Advance Payment (50%)</option>
-        </select>
+        {equipmentCategories.map((category) => (
+          <div key={category.category} className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-white">{category.category}</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+              {category.items.map((item) => (
+                <label key={item.id} className="flex items-center p-3 space-x-2 bg-gray-800 border border-gray-600 rounded-md hover:bg-gray-700">
+                  <input
+                    type="checkbox"
+                    className="accent-green-500"
+                    checked={form.selectedEquipment.some((i) => i.id === item.id)}
+                    onChange={() => handleCheckboxChange(item)}
+                  />
+                  <span className="flex-1 text-white">{item.name}</span>
+                  <span className="text-sm text-gray-300">Rs {item.price.toLocaleString()}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="mt-8 mb-4 text-xl font-bold text-right text-green-400">
+          Total: Rs {calculateTotal().toLocaleString()}
+        </div>
+
+        <div className="flex justify-center">
+          <button
+            onClick={handlePayHere}
+            className="px-8 py-3 font-semibold text-white transition bg-green-600 rounded-lg hover:bg-green-700"
+          >
+            Pay & Confirm Booking
+          </button>
+        </div>
       </div>
-
-      <button onClick={handleBooking} className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-4">
-        Book Now
-      </button>
     </div>
   );
-};
+}
 
 export default EquipmentRental;
