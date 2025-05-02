@@ -1,27 +1,45 @@
-import { useSignIn } from "@clerk/clerk-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const AdminLogin = () => {
-  const { signIn } = useSignIn();
   const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      await signIn.create({
-        identifier: emailAddress,
-        password: password,
+      const res = await fetch("http://localhost:5000/api/adminAuth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
-      navigate("/admin/admin");
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("admin", JSON.stringify({
+          username: data.username,
+          email: data.email,
+          role: data.role,
+        }));
+        navigate("/admin");
+      } else {
+        alert("❌ " + data.message);
+      }
     } catch (err) {
-      console.error(err.errors);
-      setError("Invalid email or password. Please try again.");
+      console.error("Login error:", err);
+      alert("❌ Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,36 +49,31 @@ const AdminLogin = () => {
         <h2 className="mb-6 text-2xl font-bold text-center text-white">
           Admin Login
         </h2>
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={emailAddress}
-              onChange={(e) => setEmailAddress(e.target.value)}
-              required
-              className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
-            />
-          </div>
-
-          {error && <div className="text-sm text-red-500">{error}</div>}
-
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            placeholder="Email"
+            className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
+          />
+          <input
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            placeholder="Password"
+            className="w-full p-3 text-white bg-gray-900 border border-gray-600 rounded"
+          />
           <button
             type="submit"
+            disabled={loading}
             className="w-full py-3 font-semibold text-white bg-green-600 rounded hover:bg-green-700"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

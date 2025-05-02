@@ -1,95 +1,164 @@
 import {
-  faBars,
-  faCalendarAlt,
-  faClock,
-  faComment,
-  faSignOutAlt,
-  faUser,
-  faUsers,
-  faUserShield
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-  
-  const AdminDashboard = () => {
-    const [isSidebarOpen, setSidebarOpen] = useState(true);
-    const navigate = useNavigate();
-  
-    return (
-      <div className="flex h-screen bg-gradient-to-b from-gray-900 to-black text-white">
-        {/* Sidebar */}
-        <aside
-          className={`bg-gradient-to-b from-gray-800 to-black w-64 p-5 space-y-6 transition-all duration-300 ${
-            isSidebarOpen ? "block" : "hidden"
-          } md:block`}
-        >
-          <div className="flex items-center space-x-2">
-            <FontAwesomeIcon
-              icon={faBars}
-              className="text-xl cursor-pointer md:hidden"
-              onClick={() => setSidebarOpen(!isSidebarOpen)}
-            />
-            <h1 className="text-2xl font-bold">Sound Live</h1>
-          </div>
-  
-          <nav className="mt-10 space-y-2">
-            {[
-              { icon: faUsers, label: "Users", path: "/admin/users" },
-              { icon: faCalendarAlt, label: "Event List", path: "/admin/eventlist" },
-              { icon: faUserShield, label: "Admins", path: "/admin/admins" },
-              { icon: faClock, label: "Studio Bookings", path: "/admin/studiobookings" },
-              { icon: faUserShield, label: "Equipment Bookings", path: "/admin/equipmentbookings" },
-              { icon: faComment, label: "Client Messages", path: "/admin/clientmessages" }
-            ].map((item, index) => (
-              <button
-                key={index}
-                className="flex items-center space-x-2 py-2 px-4 hover:bg-gray-700 rounded w-full"
-                onClick={() => navigate(item.path)}
-              >
-                <FontAwesomeIcon icon={item.icon} />
-                <span>{item.label}</span>
-              </button>
-            ))}
-            <button className="flex items-center space-x-2 py-2 px-4 hover:bg-red-700 rounded w-full">
-              <FontAwesomeIcon icon={faSignOutAlt} />
-              <span>Log out</span>
-            </button>
-          </nav>
-        </aside>
-  
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {/* Topbar */}
-          <div className="flex justify-between items-center p-4 bg-gray-800 rounded shadow">
-            <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="md:hidden">
-              <FontAwesomeIcon icon={faBars} className="text-xl" />
-            </button>
-            <div className="flex items-center space-x-2">
-              <FontAwesomeIcon icon={faUser} className="text-3xl text-white" />
-              <span>vijai@mit.edu</span>
+  MonitorSpeaker,
+  Music,
+  ShieldCheck,
+  Users,
+} from "lucide-react"; // optional icons
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+const AdminDashboard = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const admin = JSON.parse(localStorage.getItem("admin") || "null");
+
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAdmins: 0,
+    totalStudioBookings: 0,
+    totalEquipmentBookings: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/admin-dashboard/stats", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        });
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const navItems = [
+    { name: "Dashboard", path: "/admin" },
+    { name: "Studio Bookings", path: "/admin/StudioBookings" },
+    { name: "Equipment Bookings", path: "/admin/EquipmentBookings" },
+    { name: "Band Bookings", path: "/admin/BandBookings" },
+    { name: "All Bands", path: "/admin/AllBands" },
+    { name: "Users", path: "/admin/Users" },
+    { name: "Admins", path: "/admin/Admins" },
+    { name: "Client Messages", path: "/admin/ClientMessages" },
+  ];
+
+  const isActive = (path) => location.pathname === path;
+
+  return (
+    <div className="flex min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
+      {/* Sidebar */}
+      <aside className="hidden w-64 p-6 bg-gray-800 md:block">
+        <h2 className="mb-8 text-2xl font-bold text-green-400">Sound Live</h2>
+        <nav className="space-y-4">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`block py-2 px-4 rounded-lg ${
+                isActive(item.path)
+                  ? "bg-green-600 text-white"
+                  : "hover:bg-gray-700 text-gray-300"
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <button
+            onClick={() => {
+              localStorage.removeItem("adminToken");
+              localStorage.removeItem("admin");
+              navigate("/home");
+            }}
+            className="block w-full px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
+          >
+            Logout
+          </button>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        {admin && (
+          <div className="flex flex-col items-center justify-between mb-8 sm:flex-row">
+            <div>
+              <h2 className="text-3xl font-bold text-green-400">
+                Welcome, {admin.username}
+              </h2>
+              <p className="text-sm text-gray-400">{admin.email}</p>
+              <p className="text-xs text-gray-500">({admin.role})</p>
+            </div>
+            <div className="flex items-center justify-center mt-4 text-xl font-bold uppercase bg-green-600 rounded-full sm:mt-0 w-14 h-14">
+              {admin.username?.charAt(0)}
             </div>
           </div>
-  
-          {/* Cards Section */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-            {[
-              { icon: faUser, label: "Total Users", count: 1, color: "text-blue-400" },
-              { icon: faUsers, label: "Total Participants", count: 0, color: "text-green-400" },
-              { icon: faCalendarAlt, label: "Total Events", count: 0, color: "text-yellow-400" },
-              { icon: faUserShield, label: "Total Admins", count: 1, color: "text-red-400" }
-            ].map((card, index) => (
-              <div key={index} className="bg-gray-800 p-6 rounded-lg shadow flex flex-col items-center">
-                <FontAwesomeIcon icon={card.icon} className={`text-3xl ${card.color}`} />
-                <h2 className="text-lg font-semibold mt-2">{card.label}</h2>
-                <p className="text-3xl font-bold">{card.count}</p>
-                <span className="text-sm text-green-500">Up to date</span>
-              </div>
-            ))}
+        )}
+
+        {/* Stats Section */}
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm text-gray-400">Total Users</h3>
+              <Users className="w-5 h-5 text-blue-400" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalUsers}</p>
           </div>
-        </main>
-      </div>
-    );
-  };
-  
-  export default AdminDashboard;
+
+          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm text-gray-400">Total Admins</h3>
+              <ShieldCheck className="w-5 h-5 text-yellow-400" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalAdmins}</p>
+          </div>
+
+          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm text-gray-400">Studio Bookings</h3>
+              <MonitorSpeaker className="w-5 h-5 text-pink-400" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalStudioBookings}</p>
+          </div>
+
+          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm text-gray-400">Equipment Bookings</h3>
+              <Music className="w-5 h-5 text-red-400" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalEquipmentBookings}</p>
+          </div>
+        </div>
+
+        {/* Quick Actions - Optional */}
+        <div className="grid gap-6 mt-12 md:grid-cols-3">
+          <button
+            onClick={() => navigate("/admin/StudioBookings")}
+            className="p-5 text-center transition bg-green-600 rounded-lg shadow-lg hover:bg-green-700"
+          >
+            📅 View Studio Bookings
+          </button>
+          <button
+            onClick={() => navigate("/admin/Users")}
+            className="p-5 text-center transition bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700"
+          >
+            👥 Manage Users
+          </button>
+          <button
+            onClick={() => navigate("/admin/Admins")}
+            className="p-5 text-center transition bg-yellow-600 rounded-lg shadow-lg hover:bg-yellow-700"
+          >
+            ➕ Add Admin
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard;

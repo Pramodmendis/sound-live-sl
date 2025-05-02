@@ -1,4 +1,4 @@
-import { ClerkProvider } from "@clerk/clerk-react";
+
 import React from "react";
 import { Route, BrowserRouter as Router, Routes, useLocation } from "react-router-dom";
 import Footer from "./components/Footer";
@@ -7,6 +7,9 @@ import Navbar from "./components/Navbar";
 
 // Pages
 import About from "./pages/About";
+import Bands from "./pages/Bands";
+import Blog from "./pages/Blog";
+import BandBooking from "./pages/BookBand";
 import BookingIntro from "./pages/BookingIntro";
 import Login from "./pages/Client_Login";
 import SignupPage from "./pages/Client_Signup";
@@ -21,21 +24,19 @@ import ResetPassword from "./pages/ResetPassword";
 import Services from "./pages/Services";
 import StudioBooking from "./pages/StudioBooking";
 
-//Blog page
-import Blog from "./pages/Blog/Blog";
-
 // Admin Pages
 import AdminDashboard from "./pages/admin/admindashboard";
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminMediaUpload from "./pages/admin/AdminMediaUpload";
 import Admins from "./pages/admin/Admins";
+import AllBands from "./pages/admin/AllBands";
+import BandBookingList from "./pages/admin/BandBookingList";
 import ClientMessagesList from "./pages/admin/ClientMessages";
+import CreateBand from "./pages/admin/CreateBand";
 import EquipmentBooking from "./pages/admin/EquipmentBookings";
 import EventList from "./pages/admin/EventList";
 import StudioBookingList from "./pages/admin/StudioBookingList";
 import Users from "./pages/admin/Users";
 
-const clerkPublishableKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
 
 function Layout() {
   const location = useLocation();
@@ -65,6 +66,10 @@ function Layout() {
           <Route path="/equipment-rental" element={<EquipmentRental />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/reset-password" element={<ResetPassword/>} />
+          <Route path="/bandbooking" element={<BandBooking />} />
+          <Route path="/bands" element={<Bands />} />
+
+          {/* Client Profile */}
           <Route
   path="/client/profile"
   element={
@@ -73,6 +78,7 @@ function Layout() {
 />
 
           {/* Admin Routes */}
+          <Route index element={<AdminDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/eventlist" element={<EventList />} />
@@ -80,8 +86,13 @@ function Layout() {
           <Route path="/admin/studiobookings" element={<StudioBookingList />} />
           <Route path="/admin/equipmentbookings" element={<EquipmentBooking />} />
           <Route path="/admin/clientmessages" element={<ClientMessagesList />} />
-          <Route path="/admin/mediauploads" element={<AdminMediaUpload />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/createband" element={<CreateBand />} />
+          <Route path="/admin/bandbookings" element={<BandBookingList />} />
+          <Route path="/admin/allbands" element={<AllBands />} />
+
+          {/* 404 Page */}
+
         </Routes>
       </main>
 
@@ -93,11 +104,9 @@ function Layout() {
 
 function App() {
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
       <Router>
         <Layout />
       </Router>
-    </ClerkProvider>
   );
 }
 

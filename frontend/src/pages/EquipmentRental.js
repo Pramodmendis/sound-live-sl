@@ -107,7 +107,7 @@ function EquipmentRental() {
 
     const payment = {
       sandbox: true,
-      merchant_id: "1211149",
+      merchant_id: "4OVxzCfLv8q4JFnJVGYa9b3HB",
       return_url: "http://localhost:3000/payment-success",
       cancel_url: "http://localhost:3000/payment-cancel",
       notify_url: "http://localhost:5000/api/payments/payhere-callback",

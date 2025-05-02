@@ -11,6 +11,7 @@ const ClientProfile = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('studio');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -84,10 +85,10 @@ const ClientProfile = () => {
 
   return (
     <div className="min-h-screen p-6 text-white bg-gradient-to-b from-gray-900 to-black">
-      <div className="max-w-3xl mx-auto">
-        <h2 className="mb-6 text-3xl font-bold text-center">Client Profile</h2>
+      <div className="max-w-4xl mx-auto">
+        <h2 className="mb-6 text-3xl font-bold text-center text-green-400">Client Profile</h2>
 
-        <div className="flex items-center p-6 mb-6 space-x-4 bg-gray-800 rounded-lg">
+        <div className="flex items-center p-6 mb-6 space-x-4 bg-gray-800 rounded-lg shadow">
           {user.profilePicture ? (
             <img
               src={`http://localhost:5000/uploads/${user.profilePicture}`}
@@ -95,7 +96,7 @@ const ClientProfile = () => {
               className="object-cover w-16 h-16 rounded-full"
             />
           ) : (
-            <div className="flex items-center justify-center w-16 h-16 text-2xl font-bold uppercase bg-blue-500 rounded-full">
+            <div className="flex items-center justify-center w-16 h-16 text-2xl font-bold uppercase bg-green-600 rounded-full">
               {user.username.charAt(0)}
             </div>
           )}
@@ -105,8 +106,9 @@ const ClientProfile = () => {
           </div>
         </div>
 
-        <div className="p-6 bg-gray-800 rounded-lg">
-          <h4 className="mb-4 text-2xl font-semibold">Update Profile</h4>
+        {/* Profile Update Form */}
+        <div className="p-6 mb-8 bg-gray-800 rounded-lg shadow">
+          <h4 className="mb-4 text-2xl font-semibold text-green-400">Update Profile</h4>
           {message && <p className="mb-4 text-green-400">{message}</p>}
           {error && <p className="mb-4 text-red-400">{error}</p>}
 
@@ -167,10 +169,57 @@ const ClientProfile = () => {
               />
             </div>
 
-            <button type="submit" className="w-full py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+            <button type="submit" className="w-full py-2 font-semibold text-white transition bg-green-600 rounded hover:bg-green-700">
               Update Profile
             </button>
           </form>
+        </div>
+
+        {/* Booking Tabs */}
+        <div className="flex justify-center gap-4 mb-4">
+          {['studio', 'band', 'equipment'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                activeTab === tab
+                  ? 'bg-green-500 text-black'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              } transition`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} Bookings
+            </button>
+          ))}
+        </div>
+
+        {/* Booking Section */}
+        <div className="mt-6 space-y-4">
+          {activeTab === 'studio' && (
+            <div className="p-4 bg-gray-800 rounded-lg shadow">
+              <h3 className="mb-2 text-lg font-bold text-green-400">Studio Booking</h3>
+              <p className="text-sm text-gray-300">Date: May 5, 2025</p>
+              <p className="text-sm text-gray-300">Time: 2PM – 6PM</p>
+              <p className="text-xs text-gray-400">Status: Accepted</p>
+            </div>
+          )}
+
+          {activeTab === 'band' && (
+            <div className="p-4 bg-gray-800 rounded-lg shadow">
+              <h3 className="mb-2 text-lg font-bold text-green-400">Band Booking</h3>
+              <p className="text-sm text-gray-300">Event: Outdoor Show</p>
+              <p className="text-sm text-gray-300">Date: May 10, 2025</p>
+              <p className="text-xs text-gray-400">Status: Pending</p>
+            </div>
+          )}
+
+          {activeTab === 'equipment' && (
+            <div className="p-4 bg-gray-800 rounded-lg shadow">
+              <h3 className="mb-2 text-lg font-bold text-green-400">Equipment Rental</h3>
+              <p className="text-sm text-gray-300">Items: Mixer, Lights</p>
+              <p className="text-sm text-gray-300">Rental Date: May 12, 2025</p>
+              <p className="text-xs text-gray-400">Status: Cancelled</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

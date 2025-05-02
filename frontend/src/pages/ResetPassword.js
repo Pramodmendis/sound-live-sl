@@ -21,6 +21,7 @@ const ResetPasswordPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, resetCode, password }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
@@ -28,7 +29,7 @@ const ResetPasswordPage = () => {
         localStorage.removeItem('reset_email');
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError(data.message);
+        setError(data.message || 'Reset failed.');
       }
     } catch (err) {
       setError('Something went wrong.');
@@ -36,34 +37,49 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black">
-      <form onSubmit={handleSubmit} className="p-8 bg-white rounded shadow-md w-80">
-        <h2 className="mb-4 text-2xl text-center">Reset Password</h2>
+    <div className="flex items-center justify-center min-h-screen px-4 text-white bg-gradient-to-b from-gray-900 to-black font-poppins">
+      <div className="w-full max-w-md p-8 bg-gray-800 shadow-xl rounded-2xl">
+        <h2 className="mb-4 text-3xl font-bold text-center text-green-400">Reset Password</h2>
+        <p className="mb-6 text-sm text-center text-gray-300">
+          Enter the reset code sent to your email and your new password.
+        </p>
 
-        {message && <p className="mb-4 text-green-500">{message}</p>}
-        {error && <p className="mb-4 text-red-500">{error}</p>}
+        {message && <p className="mb-4 text-center text-green-400">{message}</p>}
+        {error && <p className="mb-4 text-center text-red-400">{error}</p>}
 
-        <input
-          type="text"
-          placeholder="Enter 6-digit code"
-          value={resetCode}
-          onChange={(e) => setResetCode(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Enter new password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block mb-1 text-sm text-gray-300">6-Digit Code</label>
+            <input
+              type="text"
+              placeholder="Enter your reset code"
+              value={resetCode}
+              onChange={(e) => setResetCode(e.target.value)}
+              className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
+          </div>
 
-        <button type="submit" className="w-full p-2 text-white bg-black rounded">
-          Reset Password
-        </button>
-      </form>
+          <div>
+            <label className="block mb-1 text-sm text-gray-300">New Password</label>
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 text-white bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-2 font-semibold text-white transition duration-300 bg-green-600 rounded-lg hover:bg-green-700"
+          >
+            Reset Password
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
