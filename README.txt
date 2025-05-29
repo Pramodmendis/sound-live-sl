@@ -15,7 +15,7 @@ Project Description: Sound Live is a comprehensive event management web applicat
 How to Run the Project:
 
 1. **Backend Setup**
-   - Navigate to `SOUND-LIVE-SL/backend`
+   - Navigate to `sound-live-sl/backend`
    - Run: `npm install`
    - Start server: `npm run dev`
 
