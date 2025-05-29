@@ -22,7 +22,7 @@ How to Run the Project:
 2. **Frontend Setup**
    - Navigate to `sound-live-sl/frontend`
    - Run: `npm install`
-   - Start frontend: `npm run dev` (or `npm run start` depending on setup)
+   - Start frontend: `npm start'
 
 3. **Access the App**
    - Frontend: http://localhost:3000/
