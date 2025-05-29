@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const CreateBand = () => {
+  usePageTitle("Create Band");
   const [band, setBand] = useState({
     name: "",
     genre: "",

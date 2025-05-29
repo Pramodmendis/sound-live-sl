@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import usePageTitle from "../hooks/usePageTitle";
 
 function BookingIntro() {
+  usePageTitle("Booking Intro");
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
@@ -34,7 +36,6 @@ function BookingIntro() {
   return (
     <div className="min-h-screen px-4 py-12 pt-32 text-white bg-gradient-to-b from-gray-900 to-black">
       <div className="max-w-6xl mx-auto text-center">
-        {/* Fixed Visible Heading with Glow */}
         <motion.h1
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}

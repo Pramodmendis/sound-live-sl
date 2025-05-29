@@ -1,13 +1,32 @@
+import { motion } from "framer-motion";
 import {
+  BarChart,
+  CalendarClock,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
   MonitorSpeaker,
   Music,
   ShieldCheck,
-  Users,
-} from "lucide-react"; // optional icons
-import React, { useEffect, useState } from "react";
+  UserPlus,
+  Users
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Bar,
+  CartesianGrid,
+  BarChart as ReBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const AdminDashboard = () => {
+  usePageTitle("Admin Dashboard");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -18,7 +37,11 @@ const AdminDashboard = () => {
     totalAdmins: 0,
     totalStudioBookings: 0,
     totalEquipmentBookings: 0,
+    totalBandBookings: 0,
+    totalSubscribers: 0,
   });
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -36,57 +59,85 @@ const AdminDashboard = () => {
     };
 
     fetchStats();
+    const interval = setInterval(fetchStats, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const navItems = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Studio Bookings", path: "/admin/StudioBookings" },
-    { name: "Equipment Bookings", path: "/admin/EquipmentBookings" },
-    { name: "Band Bookings", path: "/admin/BandBookings" },
-    { name: "All Bands", path: "/admin/AllBands" },
-    { name: "Users", path: "/admin/Users" },
-    { name: "Admins", path: "/admin/Admins" },
-    { name: "Client Messages", path: "/admin/ClientMessages" },
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { name: "Studio Bookings", path: "/admin/StudioBookings", icon: CalendarClock },
+    { name: "Equipment Bookings", path: "/admin/EquipmentBookings", icon: MonitorSpeaker },
+    { name: "Band Bookings", path: "/admin/BandBookings", icon: Music },
+    { name: "Add Booking Slot", path: "/admin/AddBookingSlot", icon: CalendarClock },
+    { name: "All Bands", path: "/admin/AllBands", icon: Music },
+    { name: "Users", path: "/admin/Users", icon: Users },
+    { name: "Admins", path: "/admin/Admins", icon: UserPlus },
+    { name: "Client Messages", path: "/admin/ClientMessages", icon: Mail },
+    { name: "Blog Management", path: "/admin/BlogManage", icon: BarChart },
+    { name: "Subscribers", path: "/admin/AdminSubscribers", icon: Users },
   ];
 
   const isActive = (path) => location.pathname === path;
 
+  const chartData = [
+    { name: "Studio", count: stats.totalStudioBookings },
+    { name: "Equipment", count: stats.totalEquipmentBookings },
+    { name: "Band", count: stats.totalBandBookings },
+    { name: "Subscribers", count: stats.totalSubscribers },
+  ];
+
   return (
     <div className="flex min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
       {/* Sidebar */}
-      <aside className="hidden w-64 p-6 bg-gray-800 md:block">
+      <aside className={`fixed z-40 inset-y-0 left-0 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 w-64 p-6 md:block`}>
         <h2 className="mb-8 text-2xl font-bold text-green-400">Sound Live</h2>
         <nav className="space-y-4">
-          {navItems.map((item) => (
+          {navItems.map(({ name, path, icon: Icon }) => (
             <Link
-              key={item.name}
-              to={item.path}
-              className={`block py-2 px-4 rounded-lg ${
-                isActive(item.path)
-                  ? "bg-green-600 text-white"
+              key={name}
+              to={path}
+              className={`flex items-center gap-2 py-2 px-4 rounded-lg ${
+                isActive(path)
+                  ? "bg-green-600 text-white font-semibold"
                   : "hover:bg-gray-700 text-gray-300"
               }`}
             >
-              {item.name}
+              <Icon className="w-5 h-5" />
+              {name}
             </Link>
           ))}
+          {/* eslint-disable-next-line no-restricted-globals */}
           <button
             onClick={() => {
-              localStorage.removeItem("adminToken");
-              localStorage.removeItem("admin");
-              navigate("/home");
+              // eslint-disable-next-line no-restricted-globals
+              if (confirm("Are you sure you want to log out?")) {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("admin");
+                navigate("/home");
+              }
             }}
-            className="block w-full px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
+            className="flex items-center w-full gap-2 px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
           >
-            Logout
+            <LogOut className="w-5 h-5" /> Logout
           </button>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 md:ml-64">
+        <button
+          className="mb-4 text-white md:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
         {admin && (
-          <div className="flex flex-col items-center justify-between mb-8 sm:flex-row">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-between mb-8 sm:flex-row"
+          >
             <div>
               <h2 className="text-3xl font-bold text-green-400">
                 Welcome, {admin.username}
@@ -94,71 +145,51 @@ const AdminDashboard = () => {
               <p className="text-sm text-gray-400">{admin.email}</p>
               <p className="text-xs text-gray-500">({admin.role})</p>
             </div>
-            <div className="flex items-center justify-center mt-4 text-xl font-bold uppercase bg-green-600 rounded-full sm:mt-0 w-14 h-14">
-              {admin.username?.charAt(0)}
-            </div>
-          </div>
+            <div className="flex items-center justify-center text-xl font-bold uppercase bg-green-600 rounded-full w-14 h-14">
+  {admin.username?.charAt(0)}
+</div>
+
+          </motion.div>
         )}
 
         {/* Stats Section */}
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm text-gray-400">Total Users</h3>
-              <Users className="w-5 h-5 text-blue-400" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalUsers}</p>
-          </div>
-
-          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm text-gray-400">Total Admins</h3>
-              <ShieldCheck className="w-5 h-5 text-yellow-400" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalAdmins}</p>
-          </div>
-
-          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm text-gray-400">Studio Bookings</h3>
-              <MonitorSpeaker className="w-5 h-5 text-pink-400" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalStudioBookings}</p>
-          </div>
-
-          <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm text-gray-400">Equipment Bookings</h3>
-              <Music className="w-5 h-5 text-red-400" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-green-400">{stats.totalEquipmentBookings}</p>
-          </div>
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <StatCard label="Total Users" value={stats.totalUsers} Icon={Users} color="blue-400" />
+          <StatCard label="Total Admins" value={stats.totalAdmins} Icon={ShieldCheck} color="yellow-400" />
+          <StatCard label="Studio Bookings" value={stats.totalStudioBookings} Icon={MonitorSpeaker} color="pink-400" />
+          <StatCard label="Equipment Bookings" value={stats.totalEquipmentBookings} Icon={Music} color="red-400" />
+          <StatCard label="Band Bookings" value={stats.totalBandBookings} Icon={Music} color="purple-400" />
+          <StatCard label="Subscribers" value={stats.totalSubscribers} Icon={Users} color="green-300" />
         </div>
 
-        {/* Quick Actions - Optional */}
-        <div className="grid gap-6 mt-12 md:grid-cols-3">
-          <button
-            onClick={() => navigate("/admin/StudioBookings")}
-            className="p-5 text-center transition bg-green-600 rounded-lg shadow-lg hover:bg-green-700"
-          >
-            📅 View Studio Bookings
-          </button>
-          <button
-            onClick={() => navigate("/admin/Users")}
-            className="p-5 text-center transition bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700"
-          >
-            👥 Manage Users
-          </button>
-          <button
-            onClick={() => navigate("/admin/Admins")}
-            className="p-5 text-center transition bg-yellow-600 rounded-lg shadow-lg hover:bg-yellow-700"
-          >
-            ➕ Add Admin
-          </button>
+        {/* Booking Summary Chart */}
+        <div className="mt-12">
+          <h3 className="mb-4 text-xl font-semibold text-green-400">Booking Overview</h3>
+          <div className="w-full p-4 bg-gray-800 rounded-lg h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <ReBarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#4B5563" />
+                <XAxis dataKey="name" stroke="#E5E7EB" />
+                <YAxis stroke="#E5E7EB" />
+                <Tooltip />
+                <Bar dataKey="count" fill="#22C55E" barSize={40} />
+              </ReBarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </main>
     </div>
   );
 };
+
+const StatCard = ({ label, value, Icon, color }) => (
+  <div className="p-6 transition bg-gray-800 shadow-lg rounded-xl hover:shadow-xl">
+    <div className="flex items-center justify-between">
+      <h3 className="text-sm text-gray-400">{label}</h3>
+      <Icon className={`w-5 h-5 text-${color}`} />
+    </div>
+    <p className="mt-2 text-3xl font-bold text-green-400">{value}</p>
+  </div>
+);
 
 export default AdminDashboard;

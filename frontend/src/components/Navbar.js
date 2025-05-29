@@ -34,7 +34,7 @@ const Navbar = () => {
     localStorage.removeItem("clientToken");
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/login");
+    navigate("/home");
   };
 
   const navLinks = [

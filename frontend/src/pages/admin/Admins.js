@@ -1,22 +1,41 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  BarChart,
+  CalendarClock,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  MonitorSpeaker,
+  Music,
+  UserPlus,
+  Users as UsersIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Admins = () => {
+  usePageTitle("Admins");
   const location = useLocation();
+  const navigate = useNavigate();
   const [admins, setAdmins] = useState([]);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const currentAdmin = JSON.parse(localStorage.getItem("admin") || "null");
 
   const navItems = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Studio Bookings", path: "/admin/StudioBookings" },
-    { name: "Equipment Bookings", path: "/admin/EquipmentBookings" },
-    { name: "Band Bookings", path: "/admin/BandBookings" },
-    { name: "All Bands", path: "/admin/AllBands" },
-    { name: "Users", path: "/admin/Users" },
-    { name: "Admins", path: "/admin/Admins" },
-    { name: "Client Messages", path: "/admin/ClientMessages" },
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { name: "Studio Bookings", path: "/admin/StudioBookings", icon: CalendarClock },
+    { name: "Equipment Bookings", path: "/admin/EquipmentBookings", icon: MonitorSpeaker },
+    { name: "Band Bookings", path: "/admin/BandBookings", icon: Music },
+    { name: "Add Booking Slot", path: "/admin/AddBookingSlot", icon: CalendarClock },
+    { name: "All Bands", path: "/admin/AllBands", icon: Music },
+    { name: "Users", path: "/admin/Users", icon: UsersIcon },
+    { name: "Admins", path: "/admin/Admins", icon: UserPlus },
+    { name: "Client Messages", path: "/admin/ClientMessages", icon: Mail },
+    { name: "Blog Management", path: "/admin/BlogManage", icon: BarChart },
+    { name: "Subscribers", path: "/admin/AdminSubscribers", icon: UsersIcon },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -113,37 +132,46 @@ const Admins = () => {
   return (
     <div className="flex min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
       {/* Sidebar */}
-      <aside className="hidden w-64 p-6 bg-gray-800 md:block">
-        <h2 className="mb-8 text-2xl font-bold text-green-400">Admin Panel</h2>
+      <aside className={`fixed z-40 inset-y-0 left-0 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 w-64 p-6 md:block`}>
+        <h2 className="mb-8 text-2xl font-bold text-green-400">Sound Live</h2>
         <nav className="space-y-4">
-          {navItems.map((item) => (
+          {navItems.map(({ name, path, icon: Icon }) => (
             <Link
-              key={item.name}
-              to={item.path}
-              className={`block py-2 px-4 rounded-lg ${
-                isActive(item.path)
-                  ? "bg-green-600 text-white"
+              key={name}
+              to={path}
+              className={`flex items-center gap-2 py-2 px-4 rounded-lg ${
+                isActive(path)
+                  ? "bg-green-600 text-white font-semibold"
                   : "hover:bg-gray-700 text-gray-300"
               }`}
             >
-              {item.name}
+              <Icon className="w-5 h-5" />
+              {name}
             </Link>
           ))}
           <button
             onClick={() => {
-              localStorage.clear();
-              window.location.href = "/";
+              localStorage.removeItem("adminToken");
+              localStorage.removeItem("admin");
+              navigate("/home");
             }}
-            className="block w-full px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
+            className="flex items-center w-full gap-2 px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
           >
-            Logout
+            <LogOut className="w-5 h-5" /> Logout
           </button>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
-        <h2 className="mb-6 text-3xl font-bold">Admins</h2>
+      <main className="flex-1 p-6 md:ml-64">
+        <button
+          className="mb-4 text-white md:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        <h2 className="mb-6 text-3xl font-bold text-green-400">Admins</h2>
 
         {currentAdmin?.role === "super" && (
           <div className="p-6 mb-10 bg-gray-800 rounded-lg shadow">
@@ -210,9 +238,7 @@ const Admins = () => {
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 text-sm rounded ${
-                        admin.role === "super"
-                          ? "bg-purple-600"
-                          : "bg-green-600"
+                        admin.role === "super" ? "bg-purple-600" : "bg-green-600"
                       }`}
                     >
                       {admin.role}

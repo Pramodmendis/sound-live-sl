@@ -1,4 +1,4 @@
-import React from "react";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const events = [
   {
@@ -22,15 +22,16 @@ const events = [
 ];
 
 const EventList = () => {
+  usePageTitle("Upcoming Events");
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-2xl font-bold text-center mb-6">Upcoming Events</h2>
+    <div className="max-w-3xl p-4 mx-auto">
+      <h2 className="mb-6 text-2xl font-bold text-center">Upcoming Events</h2>
       <div className="space-y-4">
         {events.map((event) => (
-          <div key={event.id} className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <div key={event.id} className="p-4 bg-white border border-gray-200 rounded-lg shadow-md">
             <h3 className="text-xl font-semibold">{event.title}</h3>
-            <p className="text-gray-500 text-sm">{event.date}</p>
-            <p className="text-gray-700 mt-2">{event.description}</p>
+            <p className="text-sm text-gray-500">{event.date}</p>
+            <p className="mt-2 text-gray-700">{event.description}</p>
           </div>
         ))}
       </div>

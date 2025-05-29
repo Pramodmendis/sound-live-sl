@@ -1,6 +1,6 @@
 import { faFacebookF, faInstagram } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import { useState } from "react";
 import Logo from "../assets/Logo.jpg";
 
 const Footer = () => {
@@ -27,7 +27,7 @@ const Footer = () => {
 
           <div className="flex justify-center mt-5 space-x-4 md:justify-start">
             <a
-              href="https://www.facebook.com/SoundLiveOfficial"
+              href="https://www.facebook.com/profile.php?id=61576198444037"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center text-white transition border border-gray-600 rounded-full w-9 h-9 hover:border-green-400 hover:bg-green-400 hover:text-black"
@@ -35,7 +35,7 @@ const Footer = () => {
               <FontAwesomeIcon icon={faFacebookF} />
             </a>
             <a
-              href="https://www.instagram.com/yourpage"
+              href="https://www.instagram.com/sound.livesl?igsh=MWNhM2h3emc4MWF2Mw=="
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center text-white transition border border-gray-600 rounded-full w-9 h-9 hover:border-green-400 hover:bg-green-400 hover:text-black"

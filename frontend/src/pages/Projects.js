@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import usePageTitle from "../hooks/usePageTitle";
 
 const projects = [
   {
@@ -36,6 +36,7 @@ const projects = [
 ];
 
 const Projects = () => {
+  usePageTitle("Projects");
   const navigate = useNavigate();
 
   return (

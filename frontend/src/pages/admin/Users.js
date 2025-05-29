@@ -1,20 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  BarChart,
+  CalendarClock,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  MonitorSpeaker,
+  Music,
+  UserPlus,
+  Users as UsersIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const Users = () => {
+  usePageTitle("Users");
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Studio Bookings", path: "/admin/StudioBookings" },
-    { name: "Equipment Bookings", path: "/admin/EquipmentBookings" },
-    { name: "Band Bookings", path: "/admin/BandBookings" },
-    { name: "All Bands", path: "/admin/AllBands" },
-    { name: "Users", path: "/admin/Users" },
-    { name: "Admins", path: "/admin/Admins" },
-    { name: "Client Messages", path: "/admin/ClientMessages" },
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { name: "Studio Bookings", path: "/admin/StudioBookings", icon: CalendarClock },
+    { name: "Equipment Bookings", path: "/admin/EquipmentBookings", icon: MonitorSpeaker },
+    { name: "Band Bookings", path: "/admin/BandBookings", icon: Music },
+    { name: "Add Booking Slot", path: "/admin/AddBookingSlot", icon: CalendarClock },
+    { name: "All Bands", path: "/admin/AllBands", icon: Music },
+    { name: "Users", path: "/admin/Users", icon: UsersIcon },
+    { name: "Admins", path: "/admin/Admins", icon: UserPlus },
+    { name: "Client Messages", path: "/admin/ClientMessages", icon: Mail },
+    { name: "Blog Management", path: "/admin/BlogManage", icon: BarChart },
+    { name: "Subscribers", path: "/admin/AdminSubscribers", icon: UsersIcon },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -49,63 +68,100 @@ const Users = () => {
     });
   };
 
+  const handleExport = () => {
+  const headers = ["Username", "Email", "Registered On"];
+  const rows = filtered.map((user) => [
+    user.username,
+    user.email,
+    formatDate(user.createdAt),
+  ]);
+
+  const csvContent =
+    "data:text/csv;charset=utf-8," +
+    [headers, ...rows].map((e) => e.join(",")).join("\n");
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "users.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
   return (
     <div className="flex min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
       {/* Sidebar */}
-      <aside className="hidden w-64 p-6 bg-gray-800 md:block">
-        <h2 className="mb-8 text-2xl font-bold text-green-400">Admin Panel</h2>
+      <aside className={`fixed z-40 inset-y-0 left-0 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 w-64 p-6 md:block`}>
+        <h2 className="mb-8 text-2xl font-bold text-green-400">Sound Live</h2>
         <nav className="space-y-4">
-          {navItems.map((item) => (
+          {navItems.map(({ name, path, icon: Icon }) => (
             <Link
-              key={item.name}
-              to={item.path}
-              className={`block py-2 px-4 rounded-lg ${
-                isActive(item.path)
-                  ? "bg-green-600 text-white"
+              key={name}
+              to={path}
+              className={`flex items-center gap-2 py-2 px-4 rounded-lg ${
+                isActive(path)
+                  ? "bg-green-600 text-white font-semibold"
                   : "hover:bg-gray-700 text-gray-300"
               }`}
             >
-              {item.name}
+              <Icon className="w-5 h-5" />
+              {name}
             </Link>
           ))}
           <button
             onClick={() => {
-              localStorage.clear();
-              window.location.href = "/";
+              localStorage.removeItem("adminToken");
+              localStorage.removeItem("admin");
+              navigate("/home");
             }}
-            className="block w-full px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
+            className="flex items-center w-full gap-2 px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
           >
-            Logout
+            <LogOut className="w-5 h-5" /> Logout
           </button>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
-        <h2 className="mb-6 text-3xl font-bold">Users</h2>
+      <main className="flex-1 p-6 md:ml-64">
+        <button
+          className="mb-4 text-white md:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
 
-        <div className="mb-4">
+        <h2 className="mb-6 text-3xl font-bold text-green-400">Users</h2>
+
+        <div className="flex flex-col justify-between gap-4 mb-6 md:flex-row md:items-center">
           <input
             type="text"
             placeholder="Search by username or email"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full p-3 text-white bg-gray-800 border border-gray-600 rounded md:w-1/2"
+            className="p-3 text-white bg-gray-800 border border-gray-600 rounded md:w-1/3"
           />
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 text-sm font-semibold text-black bg-green-400 rounded hover:bg-green-500"
+          >
+            Export CSV
+          </button>
         </div>
 
         <div className="p-4 overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
-          <table className="w-full text-white border-collapse">
-            <thead>
-              <tr className="bg-gray-700">
-                <th className="p-3 text-left">Username</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">Registered On</th>
+          <table className="w-full text-sm text-left text-white border-collapse">
+            <thead className="bg-gray-700">
+              <tr>
+                <th className="p-3">Username</th>
+                <th className="p-3">Email</th>
+                <th className="p-3">Registered On</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((user, i) => (
-                <tr key={i} className="border-b border-gray-600 hover:bg-gray-700">
+              {filtered.map((user, index) => (
+                <tr key={index} className="border-b border-gray-700 hover:bg-gray-700">
                   <td className="p-3">{user.username}</td>
                   <td className="p-3">{user.email}</td>
                   <td className="p-3">{formatDate(user.createdAt)}</td>

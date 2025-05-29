@@ -1,21 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  BarChart,
+  CalendarClock,
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Menu,
+  MonitorSpeaker,
+  Music,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import usePageTitle from "../../hooks/usePageTitle";
 
 const AllBands = () => {
+  usePageTitle("All Bands");
   const location = useLocation();
+  const navigate = useNavigate();
   const [bands, setBands] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editedBand, setEditedBand] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Studio Bookings", path: "/admin/StudioBookings" },
-    { name: "Equipment Bookings", path: "/admin/EquipmentBookings" },
-    { name: "Band Bookings", path: "/admin/BandBookings" },
-    { name: "All Bands", path: "/admin/AllBands" },
-    { name: "Users", path: "/admin/Users" },
-    { name: "Admins", path: "/admin/Admins" },
-    { name: "Client Messages", path: "/admin/ClientMessages" },
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { name: "Studio Bookings", path: "/admin/StudioBookings", icon: CalendarClock },
+    { name: "Equipment Bookings", path: "/admin/EquipmentBookings", icon: MonitorSpeaker },
+    { name: "Band Bookings", path: "/admin/BandBookings", icon: Music },
+    { name: "Add Booking Slot", path: "/admin/AddBookingSlot", icon: CalendarClock },
+    { name: "All Bands", path: "/admin/AllBands", icon: Music },
+    { name: "Users", path: "/admin/Users", icon: Users },
+    { name: "Admins", path: "/admin/Admins", icon: UserPlus },
+    { name: "Client Messages", path: "/admin/ClientMessages", icon: Mail },
+    { name: "Blog Management", path: "/admin/BlogManage", icon: BarChart },
+    { name: "Subscribers", path: "/admin/AdminSubscribers", icon: Users },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -41,14 +60,11 @@ const AllBands = () => {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/bands/update/${editingId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(editedBand),
-        }
-      );
+      const res = await fetch(`http://localhost:5000/api/bands/update/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editedBand),
+      });
       if (res.ok) {
         alert("✅ Band updated");
         setEditingId(null);
@@ -85,38 +101,47 @@ const AllBands = () => {
   return (
     <div className="flex min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
       {/* Sidebar */}
-      <aside className="hidden w-64 p-6 bg-gray-800 md:block">
-        <h2 className="mb-8 text-2xl font-bold text-green-400">Admin Panel</h2>
+      <aside className={`fixed z-40 inset-y-0 left-0 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 w-64 p-6 md:block`}>
+        <h2 className="mb-8 text-2xl font-bold text-green-400">Sound Live</h2>
         <nav className="space-y-4">
-          {navItems.map((item) => (
+          {navItems.map(({ name, path, icon: Icon }) => (
             <Link
-              key={item.name}
-              to={item.path}
-              className={`block py-2 px-4 rounded-lg ${
-                isActive(item.path)
-                  ? "bg-green-600 text-white"
+              key={name}
+              to={path}
+              className={`flex items-center gap-2 py-2 px-4 rounded-lg ${
+                isActive(path)
+                  ? "bg-green-600 text-white font-semibold"
                   : "hover:bg-gray-700 text-gray-300"
               }`}
             >
-              {item.name}
+              <Icon className="w-5 h-5" />
+              {name}
             </Link>
           ))}
           <button
             onClick={() => {
-              localStorage.clear();
-              window.location.href = "/";
+              localStorage.removeItem("adminToken");
+              localStorage.removeItem("admin");
+              navigate("/home");
             }}
-            className="block w-full px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
+            className="flex items-center w-full gap-2 px-4 py-2 mt-8 text-left text-gray-300 rounded-lg hover:bg-red-600"
           >
-            Logout
+            <LogOut className="w-5 h-5" /> Logout
           </button>
         </nav>
       </aside>
 
       {/* Main */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 md:ml-64">
+        <button
+          className="mb-4 text-white md:hidden"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold">All Bands</h2>
+          <h2 className="text-3xl font-bold text-green-400">All Bands</h2>
           <Link
             to="/admin/CreateBand"
             className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
@@ -139,10 +164,7 @@ const AllBands = () => {
             </thead>
             <tbody>
               {bands.map((band) => (
-                <tr
-                  key={band._id}
-                  className="border-t border-gray-600 hover:bg-gray-700"
-                >
+                <tr key={band._id} className="border-t border-gray-600 hover:bg-gray-700">
                   <td className="p-3">
                     {editingId === band._id ? (
                       <input

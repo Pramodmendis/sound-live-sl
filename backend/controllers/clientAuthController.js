@@ -1,9 +1,10 @@
 import bcrypt from 'bcryptjs';
-import transporter from '../config/nodemailer.js';
 import ClientUser from '../models/ClientUser.js';
 import { generateToken } from '../utils/generateToken.js';
+import sendResetCodeEmail from "../utils/sendResetCodeEmail.js";
+import { sendWelcomeEmail } from "../utils/sendWelcomeEmail.js";
 
-// ✅ Signup
+// client Signup
 export const registerClientUser = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -13,6 +14,7 @@ export const registerClientUser = async (req, res) => {
   }
 
   const user = await ClientUser.create({ username, email, password });
+  await sendWelcomeEmail(user.email, user.username);
 
   res.status(201).json({
     _id: user._id,
@@ -22,7 +24,7 @@ export const registerClientUser = async (req, res) => {
   });
 };
 
-// ✅ Login
+//client Login
 export const loginClientUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -52,21 +54,18 @@ export const forgotPassword = async (req, res) => {
 
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
   user.resetPasswordCode = resetCode;
-  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // expires in 10 minutes
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
   await user.save();
 
-  // Send email (or console log for dev)
-  const mailOptions = {
-    from: `"Sound Live Support" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: 'Sound Live - Password Reset Code',
-    text: `Your 6-digit password reset code is: ${resetCode}`,
-  };
+  try {
+    await sendResetCodeEmail(email, resetCode);
 
-  await transporter.sendMail(mailOptions); // comment if you don't use real email
-  console.log(`🔐 6-digit Reset Code for ${email}: ${resetCode}`);
-
-  res.json({ message: 'Reset code sent to your email.' });
+    console.log(`🔐 6-digit Reset Code for ${email}: ${resetCode}`);
+    res.json({ message: 'Reset code sent to your email.' });
+  } catch (error) {
+    console.error("❌ Failed to send reset email:", error);
+    res.status(500).json({ message: 'Failed to send reset code email.' });
+  }
 };
 
 // Reset Password with code
@@ -92,10 +91,10 @@ export const resetPassword = async (req, res) => {
   res.json({ message: 'Password reset successful.' });
 };
 
-// ✅ Update Profile
+//client Update Profile
 export const updateClientProfile = async (req, res) => {
   try {
-    const userId = req.clientUser._id; // ✅ Corrected
+    const userId = req.clientUser._id;
 
     const { username, email, currentPassword, newPassword } = req.body;
 

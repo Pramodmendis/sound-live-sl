@@ -37,3 +37,8 @@
   }
 }
 
+body.admin-page #tawkchat-container,
+body.admin-page iframe[src*="tawk.to"] {
+  display: none !important;
+}
+
