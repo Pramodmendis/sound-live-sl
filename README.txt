@@ -1,13 +1,10 @@
+# Sound Live
 
-Project Title: Sound Live – Event Management and Booking System
+**Event Management and Booking System**
 
-Developer:
+--- 
 
-Mahamandige Mendis
-BSc (Hons) Software Engineering 
-Academic Year: 2024/2025  
-Module Code: PUSL3190  
-
+## Overview
 
 Project Description: Sound Live is a comprehensive event management web application that allows clients to book sound equipment, studio sessions, and live bands. It features a modern client interface, secure admin panel, online payment system via PayHere, slot-based booking control, analytics, and profile management.
 
