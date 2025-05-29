@@ -17,15 +17,6 @@ How to Run the Project:
 1. **Backend Setup**
    - Navigate to `SOUND-LIVE-SL/backend`
    - Run: `npm install`
-   - Create a `.env` file with:
-     ```
-     MONGODB_URI= mongodb+srv://menda:IJcl8RAkuex9qOH9@cluster0.v5prj.mongodb.net/soundlivesl
-     JWT_SECRET= 93h0hlyvglrer7qko2dfwfq5g4ujpogx
-     EMAIL_USER= soundliveofficialsl@gmail.com
-     EMAIL_PASS= usnh bcjx yzzy ztxi
-     PAYHERE_MERCHANT_ID=1230386
-     BASE_URL=http://localhost:5000
-     ```
    - Start server: `npm run dev`
 
 2. **Frontend Setup**
